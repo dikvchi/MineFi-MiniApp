@@ -1,136 +1,78 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>MineFi Runner</title>
-  <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.js"></script>
-  <style>
-    body, html {
-      margin: 0;
-      padding: 0;
-      background: black;
-      overflow: hidden;
-    }
-    #boostBtn {
-      position: absolute;
-      bottom: 20px;
-      right: 20px;
-      background: gold;
-      padding: 10px 15px;
-      border-radius: 10px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    #balance {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      color: white;
-      font-family: sans-serif;
-      font-size: 18px;
-    }
-  </style>
-</head>
-<body>
-
-<div id="balance">$MINEFI: 0</div>
-<div id="boostBtn">Watch Ad: Boost x2</div>
-
-<script>
-  let coinValue = 1;
-  let balance = 0;
-  let boostActive = false;
-
-  const config = {
-    type: Phaser.AUTO,
-    width: 360,
-    height: 640,
-    physics: {
-      default: 'arcade',
-      arcade: {
-        gravity: { y: 500 },
-        debug: false
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>MineFi Runner Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
+    <style>
+      body, html { margin: 0; padding: 0; overflow: hidden; background: #000; }
+      #balance, #boostBtn {
+        position: absolute; font-family: sans-serif; color: white; z-index: 2;
       }
-    },
-    scene: {
-      preload,
-      create,
-      update
-    }
-  };
-
-  const game = new Phaser.Game(config);
-  let player, cursors, coins, ground;
-  let coinTimer = 0;
-
-  function preload() {
-    this.load.image('bg', 'https://i.imgur.com/xD7TlaE.png'); // tunnel background
-    this.load.image('player', 'https://i.imgur.com/JpT5LQb.png'); // basic character
-    this.load.image('coin', 'https://i.imgur.com/TqRlKqv.png'); // coin
-    this.load.image('ground', 'https://i.imgur.com/UWbVJhT.png'); // ground tile
-  }
-
-  function create() {
-    this.add.tileSprite(0, 0, 360, 640, 'bg').setOrigin(0).setScrollFactor(0);
-
-    ground = this.physics.add.staticGroup();
-    for (let x = 0; x < 400; x += 64) {
-      ground.create(x, 600, 'ground').setScale(1).refreshBody();
-    }
-
-    player = this.physics.add.sprite(180, 500, 'player').setScale(0.5);
-    player.setCollideWorldBounds(true);
-
-    coins = this.physics.add.group();
-    this.physics.add.collider(player, ground);
-    this.physics.add.overlap(player, coins, collectCoin, null, this);
-
-    cursors = this.input.keyboard.createCursorKeys();
-
-    this.input.on('pointerdown', () => {
-      if (player.body.touching.down) {
-        player.setVelocityY(-350);
+      #balance { top: 10px; left: 10px; }
+      #boostBtn {
+        bottom: 20px; right: 20px;
+        padding: 10px; background: gold; border-radius: 10px;
+        font-weight: bold; cursor: pointer;
       }
-    });
+    </style>
+  </head>
+  <body>
+    <div id="balance">$MINEFI: 0</div>
+    <div id="boostBtn">Watch Ad: Boost x2</div>
+    <script>
+      let balance = 0;
+      let boost = false;
 
-    // Spawn coins every 1 second
-    this.time.addEvent({
-      delay: 1000,
-      callback: () => {
-        const x = Phaser.Math.Between(50, 310);
-        const coin = coins.create(x, -20, 'coin').setScale(0.4);
-        coin.setVelocityY(150);
-      },
-      loop: true
-    });
-  }
+      const config = {
+        type: Phaser.AUTO,
+        width: 360,
+        height: 640,
+        physics: { default: 'arcade', arcade: { gravity: { y: 300 } } },
+        scene: {
+          preload() {
+            this.load.image('coin', 'https://i.imgur.com/TqRlKqv.png');
+            this.load.image('player', 'https://i.imgur.com/JpT5LQb.png');
+          },
+          create() {
+            this.player = this.physics.add.sprite(180, 550, 'player').setScale(0.5);
+            this.coins = this.physics.add.group();
 
-  function update() {
-    if (cursors.left.isDown) {
-      player.setVelocityX(-160);
-    } else if (cursors.right.isDown) {
-      player.setVelocityX(160);
-    } else {
-      player.setVelocityX(0);
-    }
-  }
+            this.physics.add.overlap(this.player, this.coins, (player, coin) => {
+              coin.destroy();
+              balance += boost ? 2 : 1;
+              document.getElementById('balance').innerText = `$MINEFI: ${balance}`;
+            }, null, this);
 
-  function collectCoin(player, coin) {
-    coin.destroy();
-    balance += boostActive ? (coinValue * 2) : coinValue;
-    document.getElementById("balance").innerText = `$MINEFI: ${balance}`;
-  }
+            this.time.addEvent({
+              delay: 1000,
+              callback: () => {
+                const x = Phaser.Math.Between(20, 340);
+                const c = this.coins.create(x, 0, 'coin').setScale(0.4);
+                c.setVelocityY(100);
+              },
+              loop: true
+            });
 
-  // Boost logic
-  document.getElementById("boostBtn").onclick = () => {
-    alert("🎥 Ad Playing (simulated)");
-    boostActive = true;
-    document.getElementById("boostBtn").innerText = "BOOST x2 (30s)";
-    setTimeout(() => {
-      boostActive = false;
-      document.getElementById("boostBtn").innerText = "Watch Ad: Boost x2";
-    }, 30000);
-  };
-</script>
-</body>
+            this.input.on('pointerdown', () => {
+              this.player.setVelocityY(-250);
+            });
+          },
+          update() {}
+        }
+      };
+
+      new Phaser.Game(config);
+
+      document.getElementById("boostBtn").onclick = () => {
+        alert("Simulated Ad Watch");
+        boost = true;
+        document.getElementById("boostBtn").innerText = "BOOST x2 (30s)";
+        setTimeout(() => {
+          boost = false;
+          document.getElementById("boostBtn").innerText = "Watch Ad: Boost x2";
+        }, 30000);
+      };
+    </script>
+  </body>
 </html>
