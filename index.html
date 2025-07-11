@@ -1,211 +1,126 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>MineFi</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MineFi Mini App</title>
   <style>
-    :root {
-      --bg-color: #111;
-      --text-color: #fff;
-      --btn-bg: gold;
-      --btn-text: #111;
-    }
-
-    body.light {
-      --bg-color: #f9f9f9;
-      --text-color: #111;
-      --btn-bg: #333;
-      --btn-text: #fff;
-    }
-
     body {
+      font-family: Arial, sans-serif;
+      background: #121212;
+      color: #fff;
       margin: 0;
       padding: 0;
-      background: var(--bg-color);
-      color: var(--text-color);
-      font-family: Arial, sans-serif;
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-      transition: background 0.3s, color 0.3s;
-    }
-
-    header {
-      padding: 15px;
       text-align: center;
-      font-size: 18px;
-      font-weight: bold;
     }
-
-    main {
-      flex: 1;
-      display: none;
+    .container {
       padding: 20px;
-      text-align: center;
     }
-
-    main.active {
-      display: block;
+    .coin {
+      width: 100px;
+      height: 100px;
+      margin: 20px auto;
+      background: gold;
+      border-radius: 50%;
+      line-height: 100px;
+      font-weight: bold;
+      font-size: 20px;
     }
-
-    .coin-btn {
-      background-color: transparent;
-      border: none;
-    }
-
-    .coin-img {
-      width: 150px;
-      height: 150px;
-    }
-
     .balance {
       font-size: 24px;
-      margin-bottom: 20px;
-      color: gold;
+      margin-top: 10px;
     }
-
-    .nav {
+    .boost-btn, .task-btn, .nav-btn, .settings-btn {
+      display: block;
+      margin: 10px auto;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 10px;
+      background: #ff9800;
+      color: #fff;
+      font-size: 16px;
+    }
+    .nav-bar {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      background: #222;
       display: flex;
       justify-content: space-around;
-      background: #222;
       padding: 10px 0;
-      border-top: 1px solid #333;
     }
-
-    .nav button {
-      background: none;
+    .nav-bar button {
+      background: #333;
+      color: #fff;
+      padding: 10px;
       border: none;
-      color: #ccc;
+      border-radius: 10px;
       font-size: 14px;
     }
-
-    .nav button.active {
-      color: gold;
+    .task-list {
+      margin-top: 20px;
     }
-
-    .task-btn {
-      background: var(--btn-bg);
-      color: var(--btn-text);
-      border: none;
-      padding: 12px;
-      margin: 10px 0;
-      border-radius: 8px;
-      width: 100%;
-      font-size: 16px;
+    #settings {
+      margin-top: 20px;
     }
-
-    .boost {
-      margin-top: 15px;
-      font-size: 16px;
-      color: #0f0;
-    }
-
-    .input-section input {
+    input[type="text"] {
       padding: 10px;
-      border-radius: 5px;
-      border: 1px solid #555;
-      width: 80%;
-      margin-top: 10px;
+      border-radius: 8px;
+      border: none;
     }
   </style>
 </head>
-<body class="dark">
-  <header id="header">Balance: <span id="balance">0</span> $MINEFI</header>
+<body>
+  <div class="container">
+    <h1>MineFi</h1>
+    <div class="balance">Balance: <span id="balance">0</span> MINEFI</div>
+    <div class="coin" onclick="mine()">MineFi</div>
+    <button class="boost-btn" onclick="activateBoost()">⚡ Boost x2 (30s)</button>
 
-  <main id="tap" class="active">
-    <button class="coin-btn" onclick="mine()">
-      <img src="https://i.imgur.com/3z2rX5Z.png" alt="MineFi Coin" class="coin-img">
-    </button>
-    <div class="boost" id="boostStatus">Boost: OFF</div>
-    <button class="task-btn" onclick="activateBoost()">⚡ Activate Boost (2× for 30s)</button>
-  </main>
+    <div class="task-list">
+      <h3>Tasks</h3>
+      <button class="task-btn" onclick="window.open('https://otieu.com/4/8777184', '_blank')">
+        📺 Watch Ad (Every 20 mins)
+      </button>
+      <button class="task-btn">✅ Follow us on Twitter (Coming Soon)</button>
+      <button class="task-btn">✅ Join Telegram (Coming Soon)</button>
+    </div>
 
-  <main id="leaderboard">
-    <p>🏆 Leaderboard Coming Soon</p>
-  </main>
+    <div id="settings">
+      <h3>Settings</h3>
+      <input type="text" id="usernameInput" placeholder="Enter username" />
+      <button class="settings-btn" onclick="changeUsername()">Save Username</button>
+      <button class="settings-btn" onclick="toggleTheme()">🌙 Toggle Theme</button>
+      <div>
+        <p>Your Referral Link:</p>
+        <input type="text" id="refLink" readonly style="width: 80%;" />
+      </div>
+    </div>
+  </div>
 
-<main id="referral">
-  <p>👥 Share your referral link:</p>
-  <input type="text" id="refLink" readonly onclick="this.select()">
-</main>
-
-  <main id="tasks">
-    <button class="task-btn">✅ Follow us on Twitter</button>
-    <button class="task-btn">✅ Join Telegram Channel</button>
-    <button class="task-btn" id="monetagTask" onclick="openAdTask()">🎮 Play Ad Task (every 20 mins)</button>
-    <p id="taskTimer"></p>
-  </main>
-
-  <main id="wallet">
-    <p>👛 Your Wallet Balance: <span id="walletBalance">0</span> $MINEFI</p>
-    <button class="task-btn">📤 Withdraw (Coming Soon)</button>
-  </main>
-
-  <main id="settings">
-    <div class="input-section">
-      <label>Change Username</label><br>
-      <input type="text" id="usernameInput" placeholder="Enter new username">
-    </div><br>
-    <button class="task-btn" onclick="changeUsername()">Save Username</button>
-    <button class="task-btn" onclick="toggleTheme()">Toggle Theme</button>
-    <button class="task-btn" onclick="toggleNotification()">🔔 Toggle Task Notification</button>
-    <button class="task-btn" onclick="resetGame()">⚠️ Reset Game Data</button>
-    <button class="task-btn" onclick="alert('MineFi is a tap simulation game. Not financial advice.')">ℹ️ About MineFi</button>
-  </main>
-
-  <nav class="nav">
-    <button onclick="switchTab('tap')" class="active">🏠 Tap</button>
-    <button onclick="switchTab('leaderboard')">📊 Leaderboard</button>
-    <button onclick="switchTab('referral')">👥 Referral</button>
-    <button onclick="switchTab('tasks')">📋 Tasks</button>
-    <button onclick="switchTab('wallet')">👛 Wallet</button>
-    <button onclick="switchTab('settings')">⚙️ Settings</button>
-  </nav>
+  <div class="nav-bar">
+    <button class="nav-btn">🪙 Tap</button>
+    <button class="nav-btn">🏆 Leaderboard</button>
+    <button class="nav-btn">👥 Referral</button>
+    <button class="nav-btn">📋 Tasks</button>
+    <button class="nav-btn">💼 Wallet</button>
+  </div>
 
   <script>
-    Telegram.WebApp.ready();
-    Telegram.WebApp.expand();
-
-    let balance = parseInt(localStorage.getItem('minefi_balance') || 0);
-    let boostActive = false;
-    let theme = localStorage.getItem('theme') || 'dark';
-    let nextAdTime = parseInt(localStorage.getItem('nextAdTime') || 0);
-
-    document.getElementById("balance").innerText = balance;
-    document.getElementById("walletBalance").innerText = balance;
-    document.body.className = theme;
+    let balance = 0;
+    let isBoosted = false;
 
     function mine() {
-      let gain = boostActive ? 2 : 1;
-      balance += gain;
+      const increment = isBoosted ? 2 : 1;
+      balance += increment;
       document.getElementById("balance").innerText = balance;
-      document.getElementById("walletBalance").innerText = balance;
-      localStorage.setItem('minefi_balance', balance);
     }
 
     function activateBoost() {
-      if (boostActive) return;
-      boostActive = true;
-      document.getElementById("boostStatus").innerText = "Boost: ON 🔥";
+      isBoosted = true;
       setTimeout(() => {
-        boostActive = false;
-        document.getElementById("boostStatus").innerText = "Boost: OFF";
+        isBoosted = false;
       }, 30000);
-    }
-
-    function switchTab(id) {
-      document.querySelectorAll("main").forEach(m => m.classList.remove("active"));
-      document.querySelector(`#${id}`).classList.add("active");
-      document.querySelectorAll(".nav button").forEach(b => b.classList.remove("active"));
-      [...document.querySelectorAll(".nav button")].find(btn => btn.innerText.includes(id.charAt(0).toUpperCase())).classList.add("active");
-    }
-
-    function toggleTheme() {
-      theme = theme === 'dark' ? 'light' : 'dark';
-      document.body.className = theme;
-      localStorage.setItem('theme', theme);
     }
 
     function changeUsername() {
@@ -213,56 +128,26 @@
       if (username) {
         localStorage.setItem('minefi_username', username);
         alert("Username saved!");
+        updateReferralLink();
       }
     }
 
-    function toggleNotification() {
-      alert("Notifications toggled (demo only).");
-    }
-
-    function resetGame() {
-      if (confirm("Reset all data?")) {
-        localStorage.clear();
-        location.reload();
-      }
-    }
-
-    function openAdTask() {
-      const now = Date.now();
-      if (now >= nextAdTime) {
-        localStorage.setItem("nextAdTime", now + 20 * 60 * 1000); // 20 mins
-        window.location.href = "https://"https://otieu.com/4/8777184;
-      } else {
-        const mins = Math.ceil((nextAdTime - now) / 60000);
-        alert("Please wait " + mins + " minute(s) before retrying.");
-      }
-    }
-
-    setInterval(() => {
-      const now = Date.now();
-      const timeLeft = Math.max(0, nextAdTime - now);
-      if (timeLeft > 0) {
-        document.getElementById("taskTimer").innerText = "Next game task available in: " + Math.ceil(timeLeft / 60000) + " mins";
-      } else {
-        document.getElementById("taskTimer").innerText = "🎮 Game task is ready!";
-      }
-    }, 10000);
     function updateReferralLink() {
-  const refUser = localStorage.getItem('minefi_username') || 'MineFiUser';
-  document.getElementById('refLink').value = `https://t.me/MineFi?start=${refUser}`;
-}
+      const refUser = localStorage.getItem('minefi_username') || 'MineFiUser';
+      document.getElementById('refLink').value = `https://t.me/MineFiBot?start=${refUser}`;
+    }
 
-function changeUsername() {
-  const username = document.getElementById("usernameInput").value.trim();
-  if (username) {
-    localStorage.setItem('minefi_username', username);
-    alert("Username saved!");
-    updateReferralLink(); // Update referral link with new username
-  }
-}
+    function toggleTheme() {
+      if (document.body.style.background === "white") {
+        document.body.style.background = "#121212";
+        document.body.style.color = "#fff";
+      } else {
+        document.body.style.background = "white";
+        document.body.style.color = "#000";
+      }
+    }
 
-// Run on page load to show the correct referral link
-updateReferralLink();
+    updateReferralLink();
   </script>
 </body>
-</html>
+          </html>
