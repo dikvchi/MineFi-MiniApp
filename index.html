@@ -6,7 +6,166 @@
   <title>MineFi</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" />
   <style>
-    /* We will add CSS in the next step */
+    * {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  background: #121212;
+  color: white;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  transition: background 0.3s, color 0.3s;
+}
+
+.app-header {
+  text-align: center;
+  padding: 10px;
+}
+
+.logo {
+  height: 60px;
+  margin-bottom: 10px;
+}
+
+.balance {
+  font-size: 18px;
+  margin-top: 5px;
+  font-weight: 600;
+}
+
+main {
+  flex: 1;
+  overflow-y: auto;
+  padding: 15px 20px;
+}
+
+.tab-content {
+  display: none;
+  animation: fadeIn 0.3s ease;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from {opacity: 0;}
+  to {opacity: 1;}
+}
+
+.coin {
+  width: 120px;
+  height: 120px;
+  margin: 30px auto;
+  background: radial-gradient(circle, gold 0%, orange 100%);
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  font-size: 18px;
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.8);
+  cursor: pointer;
+  transition: transform 0.1s ease, box-shadow 0.2s ease;
+}
+
+.coin:active {
+  transform: scale(1.1);
+  box-shadow: 0 0 25px rgba(255, 215, 0, 1);
+}
+
+button {
+  font-family: 'Poppins', sans-serif;
+}
+
+.boost-btn, .task-btn, .btn {
+  display: block;
+  margin: 15px auto;
+  padding: 12px 20px;
+  background: #ff9800;
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 15px;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+  transition: background 0.3s;
+}
+
+.boost-btn:hover, .task-btn:hover, .btn:hover {
+  background: #ffa726;
+}
+
+.boost-timer {
+  text-align: center;
+  font-size: 16px;
+  margin-top: 10px;
+  color: #90ee90;
+}
+
+input[type="text"] {
+  display: block;
+  margin: 10px auto;
+  padding: 10px;
+  width: 90%;
+  border-radius: 8px;
+  border: none;
+  font-size: 14px;
+}
+
+.tabs {
+  display: flex;
+  justify-content: space-around;
+  background: #1f1f1f;
+  padding: 10px 0;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  border-top: 1px solid #333;
+}
+
+.tab-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.info-text {
+  text-align: center;
+  font-size: 14px;
+  color: #ccc;
+  margin-top: 10px;
+}
+
+/* Light Theme Support */
+.light-theme {
+  background: white;
+  color: black;
+}
+
+.light-theme .tabs {
+  background: #eee;
+  border-top: 1px solid #ccc;
+}
+
+.light-theme .tab-btn {
+  color: black;
+}
+
+.light-theme .boost-btn,
+.light-theme .task-btn,
+.light-theme .btn {
+  background: #ff9800;
+  color: white;
+    }
   </style>
 </head>
 <body>
@@ -64,7 +223,111 @@
   </footer>
 
   <script>
-    // JS code comes next!
+  let balance = parseInt(localStorage.getItem("minefi_balance") || "0");
+  let boostActive = false;
+  let boostTimeLeft = 0;
+  let boostCount = parseInt(localStorage.getItem("minefi_boosts") || "0");
+  let nextAdTime = parseInt(localStorage.getItem("minefi_nextAd") || "0");
+  let soundEnabled = localStorage.getItem("minefi_sound") !== "off";
+
+  const username = Telegram.WebApp.initDataUnsafe?.user?.username || "MineFiUser";
+  const boostTimerEl = document.getElementById("boostTimer");
+
+  // Load UI with saved data
+  document.getElementById("balance").innerText = balance;
+  document.getElementById("walletBalance").innerText = balance;
+  document.getElementById("boostCount").innerText = boostCount;
+  document.getElementById("usernameDisplay").innerText = "@" + username;
+  document.getElementById("refLink").value = `https://t.me/MineFiBot?start=${username}`;
+
+  function showTab(id) {
+    document.querySelectorAll(".tab-content").forEach(tab => tab.classList.remove("active"));
+    document.getElementById(id).classList.add("active");
+  }
+
+  function mine() {
+    const amount = boostActive ? 2 : 1;
+    balance += amount;
+    document.getElementById("balance").innerText = balance;
+    document.getElementById("walletBalance").innerText = balance;
+    localStorage.setItem("minefi_balance", balance);
+    if (soundEnabled) playClick();
+  }
+
+  function activateBoost() {
+    if (boostActive || boostTimeLeft > 0) return;
+
+    boostActive = true;
+    boostTimeLeft = 30;
+    boostCount++;
+    localStorage.setItem("minefi_boosts", boostCount);
+    document.getElementById("boostCount").innerText = boostCount;
+    updateBoostTimer();
+
+    const timer = setInterval(() => {
+      boostTimeLeft--;
+      updateBoostTimer();
+      if (boostTimeLeft <= 0) {
+        clearInterval(timer);
+        boostActive = false;
+        boostTimerEl.innerText = "";
+      }
+    }, 1000);
+  }
+
+  function updateBoostTimer() {
+    if (boostTimeLeft > 0) {
+      boostTimerEl.innerText = `⏱️ Boost: ${boostTimeLeft}s`;
+    } else {
+      boostTimerEl.innerText = "";
+    }
+  }
+
+  function handleAdTask() {
+    const now = Date.now();
+    if (now < nextAdTime) {
+      const minutesLeft = Math.ceil((nextAdTime - now) / 60000);
+      alert(`Please wait ${minutesLeft} more minute(s)`);
+      return;
+    }
+    window.open("https://otieu.com/4/8777184", "_blank");
+    nextAdTime = now + 20 * 60 * 1000;
+    localStorage.setItem("minefi_nextAd", nextAdTime);
+  }
+
+  function changeUsername() {
+    const input = document.getElementById("usernameInput").value.trim();
+    if (input) {
+      document.getElementById("usernameDisplay").innerText = "@" + input;
+      document.getElementById("refLink").value = `https://t.me/MineFiBot?start=${input}`;
+    }
+  }
+
+  function copyReferral() {
+    const ref = document.getElementById("refLink");
+    ref.select();
+    ref.setSelectionRange(0, 99999);
+    navigator.clipboard.writeText(ref.value);
+    alert("Referral link copied!");
+  }
+
+  function toggleTheme() {
+    document.body.classList.toggle("light-theme");
+  }
+
+  function toggleSound() {
+    soundEnabled = !soundEnabled;
+    localStorage.setItem("minefi_sound", soundEnabled ? "on" : "off");
+    alert("Sound " + (soundEnabled ? "enabled" : "disabled"));
+  }
+
+  function playClick() {
+    const click = new Audio("https://cdn.pixabay.com/download/audio/2023/06/15/audio_5e8b4cd403.mp3?filename=click-147954.mp3");
+    click.play();
+  }
+
+  // Set up coin tap
+  document.getElementById("coinBtn").addEventListener("click", mine);
   </script>
 </body>
 </html>
