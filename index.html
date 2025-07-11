@@ -4,202 +4,67 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>MineFi</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" />
   <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      margin: 0;
-      background: #121212;
-      color: white;
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-    }
-    header {
-      text-align: center;
-      padding: 10px;
-    }
-    header img {
-      height: 50px;
-    }
-    .tabs {
-      display: flex;
-      justify-content: space-around;
-      background: #1e1e1e;
-      padding: 10px 0;
-      position: fixed;
-      bottom: 0;
-      width: 100%;
-    }
-    .tab-btn {
-      background: none;
-      border: none;
-      color: white;
-      font-size: 16px;
-    }
-    .tab-content {
-      flex: 1;
-      overflow-y: auto;
-      padding: 20px;
-      display: none;
-    }
-    .active {
-      display: block !important;
-    }
-    .coin {
-      width: 100px;
-      height: 100px;
-      background: gold;
-      border-radius: 50%;
-      margin: 20px auto;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      font-size: 18px;
-    }
-    .boost-btn, .task-btn, .settings-btn {
-      background: #ff9800;
-      color: white;
-      border: none;
-      padding: 10px;
-      border-radius: 10px;
-      margin: 10px auto;
-      display: block;
-      width: 80%;
-    }
-    .balance-display {
-      font-size: 22px;
-      text-align: center;
-    }
-    input[type="text"] {
-      padding: 10px;
-      width: 80%;
-      border-radius: 8px;
-      border: none;
-      margin-top: 10px;
-    }
+    /* We will add CSS in the next step */
   </style>
 </head>
 <body>
-  <header>
-    <img src="https://chat.openai.com/sandbox/mnt/data/MineFi_logo_640x360.png" alt="MineFi Logo"/>
+  <header class="app-header">
+    <img src="https://chat.openai.com/sandbox/mnt/data/MineFi_logo_640x360.png" alt="MineFi Logo" class="logo"/>
     <h2 id="usernameDisplay">@username</h2>
+    <p class="balance">Balance: <span id="balance">0</span> MINEFI</p>
   </header>
 
-  <div id="tap" class="tab-content active">
-    <div class="balance-display">Balance: <span id="balance">0</span> MINEFI</div>
-    <div class="coin" onclick="mine()">MineFi</div>
-    <button class="boost-btn" onclick="activateBoost()">⚡ Boost x2 (30s)</button>
-    <p id="boostStatus" style="text-align:center; color:lightgreen;"></p>
-  </div>
+  <main>
+    <!-- Tap Page -->
+    <section id="tap" class="tab-content active">
+      <div class="coin" id="coinBtn">MineFi</div>
+      <button class="boost-btn" onclick="activateBoost()">⚡ Boost x2</button>
+      <div id="boostTimer" class="boost-timer"></div>
+    </section>
 
-  <div id="tasks" class="tab-content">
-    <h3>Tasks</h3>
-    <button class="task-btn" onclick="handleAdTask()">📺 Watch Ad</button>
-    <p id="adTimer" style="text-align:center;"></p>
-  </div>
+    <!-- Tasks Page -->
+    <section id="tasks" class="tab-content">
+      <h3>Tasks</h3>
+      <button class="task-btn" onclick="handleAdTask()">📺 Watch Ad</button>
+      <p id="adTimer" class="info-text"></p>
+    </section>
 
-  <div id="referral" class="tab-content">
-    <h3>Your Referral Link</h3>
-    <input type="text" id="refLink" readonly />
-    <button class="settings-btn" onclick="copyReferral()">Copy Link</button>
-  </div>
+    <!-- Referral Page -->
+    <section id="referral" class="tab-content">
+      <h3>Your Referral Link</h3>
+      <input type="text" id="refLink" readonly />
+      <button class="btn" onclick="copyReferral()">Copy Link</button>
+    </section>
 
-  <div id="wallet" class="tab-content">
-    <h3>Wallet</h3>
-    <p>Coins Mined: <span id="walletBalance">0</span> MINEFI</p>
-    <p>Boosts Used: <span id="boostCount">0</span></p>
-  </div>
+    <!-- Wallet Page -->
+    <section id="wallet" class="tab-content">
+      <h3>Wallet</h3>
+      <p>Coins Mined: <span id="walletBalance">0</span> MINEFI</p>
+      <p>Boosts Used: <span id="boostCount">0</span></p>
+    </section>
 
-  <div id="settings" class="tab-content">
-    <h3>Settings</h3>
-    <input type="text" id="usernameInput" placeholder="Change username"/>
-    <button class="settings-btn" onclick="changeUsername()">Save</button>
-    <button class="settings-btn" onclick="toggleTheme()">🌙 Toggle Theme</button>
-  </div>
+    <!-- Settings Page -->
+    <section id="settings" class="tab-content">
+      <h3>Settings</h3>
+      <input type="text" id="usernameInput" placeholder="Change username"/>
+      <button class="btn" onclick="changeUsername()">Save</button>
+      <button class="btn" onclick="toggleTheme()">🌙 Toggle Theme</button>
+      <button class="btn" onclick="toggleSound()">🔈 Toggle Sound</button>
+    </section>
+  </main>
 
-  <div class="tabs">
+  <footer class="tabs">
     <button class="tab-btn" onclick="showTab('tap')">🪙 Tap</button>
     <button class="tab-btn" onclick="showTab('tasks')">📋 Tasks</button>
     <button class="tab-btn" onclick="showTab('referral')">👥 Referral</button>
     <button class="tab-btn" onclick="showTab('wallet')">💼 Wallet</button>
     <button class="tab-btn" onclick="showTab('settings')">⚙️ Settings</button>
-  </div>
+  </footer>
 
   <script>
-    let balance = parseInt(localStorage.getItem("minefi_balance") || "0");
-    let boostActive = false;
-    let boostCount = parseInt(localStorage.getItem("minefi_boosts") || "0");
-    let nextAdTime = parseInt(localStorage.getItem("minefi_nextAd") || "0");
-
-    document.getElementById("balance").innerText = balance;
-    document.getElementById("walletBalance").innerText = balance;
-    document.getElementById("boostCount").innerText = boostCount;
-
-    const tgUser = window.Telegram.WebApp.initDataUnsafe?.user?.username || "MineFiUser";
-    document.getElementById("usernameDisplay").innerText = "@" + tgUser;
-    document.getElementById("refLink").value = `https://t.me/MineFiBot?start=${tgUser}`;
-
-    function mine() {
-      const amount = boostActive ? 2 : 1;
-      balance += amount;
-      document.getElementById("balance").innerText = balance;
-      document.getElementById("walletBalance").innerText = balance;
-      localStorage.setItem("minefi_balance", balance);
-    }
-
-    function activateBoost() {
-      if (boostActive) return;
-      boostActive = true;
-      boostCount++;
-      document.getElementById("boostCount").innerText = boostCount;
-      document.getElementById("boostStatus").innerText = "Boost Active!";
-      localStorage.setItem("minefi_boosts", boostCount);
-      setTimeout(() => {
-        boostActive = false;
-        document.getElementById("boostStatus").innerText = "";
-      }, 30000);
-    }
-
-    function showTab(id) {
-      document.querySelectorAll(".tab-content").forEach(tab => tab.classList.remove("active"));
-      document.getElementById(id).classList.add("active");
-    }
-
-    function changeUsername() {
-      const val = document.getElementById("usernameInput").value.trim();
-      if (val) {
-        document.getElementById("usernameDisplay").innerText = "@" + val;
-        document.getElementById("refLink").value = `https://t.me/MineFiBot?start=${val}`;
-        alert("Username changed!");
-      }
-    }
-
-    function toggleTheme() {
-      const isDark = document.body.style.background === "white";
-      document.body.style.background = isDark ? "#121212" : "white";
-      document.body.style.color = isDark ? "white" : "black";
-    }
-
-    function handleAdTask() {
-      const now = Date.now();
-      if (now < nextAdTime) {
-        const wait = Math.ceil((nextAdTime - now) / 60000);
-        alert("Wait " + wait + " more minutes to watch the next ad.");
-        return;
-      }
-      window.open("https://otieu.com/4/8777184", "_blank");
-      nextAdTime = now + 20 * 60 * 1000;
-      localStorage.setItem("minefi_nextAd", nextAdTime);
-    }
-
-    function copyReferral() {
-      const ref = document.getElementById("refLink");
-      ref.select();
-      ref.setSelectionRange(0, 99999);
-      navigator.clipboard.writeText(ref.value);
-      alert("Referral link copied!");
-    }
+    // JS code comes next!
   </script>
 </body>
 </html>
