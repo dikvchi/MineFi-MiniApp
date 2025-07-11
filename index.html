@@ -1,78 +1,241 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <title>MineFi Runner Test</title>
-    <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tech Trends & Reviews</title>
     <style>
-      body, html { margin: 0; padding: 0; overflow: hidden; background: #000; }
-      #balance, #boostBtn {
-        position: absolute; font-family: sans-serif; color: white; z-index: 2;
-      }
-      #balance { top: 10px; left: 10px; }
-      #boostBtn {
-        bottom: 20px; right: 20px;
-        padding: 10px; background: gold; border-radius: 10px;
-        font-weight: bold; cursor: pointer;
-      }
-    </style>
-  </head>
-  <body>
-    <div id="balance">$MINEFI: 0</div>
-    <div id="boostBtn">Watch Ad: Boost x2</div>
-    <script>
-      let balance = 0;
-      let boost = false;
-
-      const config = {
-        type: Phaser.AUTO,
-        width: 360,
-        height: 640,
-        physics: { default: 'arcade', arcade: { gravity: { y: 300 } } },
-        scene: {
-          preload() {
-            this.load.image('coin', 'https://i.imgur.com/TqRlKqv.png');
-            this.load.image('player', 'https://i.imgur.com/JpT5LQb.png');
-          },
-          create() {
-            this.player = this.physics.add.sprite(180, 550, 'player').setScale(0.5);
-            this.coins = this.physics.add.group();
-
-            this.physics.add.overlap(this.player, this.coins, (player, coin) => {
-              coin.destroy();
-              balance += boost ? 2 : 1;
-              document.getElementById('balance').innerText = `$MINEFI: ${balance}`;
-            }, null, this);
-
-            this.time.addEvent({
-              delay: 1000,
-              callback: () => {
-                const x = Phaser.Math.Between(20, 340);
-                const c = this.coins.create(x, 0, 'coin').setScale(0.4);
-                c.setVelocityY(100);
-              },
-              loop: true
-            });
-
-            this.input.on('pointerdown', () => {
-              this.player.setVelocityY(-250);
-            });
-          },
-          update() {}
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+            color: #222;
         }
-      };
+        header {
+            background: #222;
+            color: #fff;
+            padding: 1rem;
+        }
+        header h1 {
+            margin: 0 0 0.5rem 0;
+        }
+        nav {
+            margin-bottom: 1rem;
+        }
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            margin-right: 1.5rem;
+            font-weight: bold;
+        }
+        main {
+            display: flex;
+            flex-direction: row;
+            gap: 2rem;
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .latest-articles {
+            flex: 2;
+        }
+        .articles article {
+            background: #fff;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+        }
+        aside {
+            flex: 1;
+            min-width: 250px;
+        }
+        aside section {
+            background: #fff;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+        }
+        .ad {
+            margin: 1rem 0;
+            padding: 1rem;
+            background: #f1f1f1;
+            border: 1px dashed #bbb;
+            text-align: center;
+            border-radius: 8px;
+            color: #888;
+        }
+        footer {
+            text-align: center;
+            padding: 1rem;
+            background: #222;
+            color: #fff;
+        }
+        @media (max-width: 800px) {
+            main {
+                flex-direction: column;
+                gap: 0;
+                padding: 1rem;
+            }
+            aside {
+                min-width: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Tech Trends & Reviews</h1>
+        <nav>
+            <a href="#" onclick="showHome(); return false;">Home</a>
+            <a href="#" onclick="showCategory('News'); return false;">News</a>
+            <a href="#" onclick="showCategory('Reviews'); return false;">Reviews</a>
+            <a href="#" onclick="showCategory('Guides'); return false;">Guides</a>
+        </nav>
+    </header>
+    <main id="main-content">
+        <!-- Homepage will be loaded here by JS -->
+    </main>
+    <footer>
+        <p>&copy; 2025 Tech Trends & Reviews</p>
+    </footer>
+    <script>
+        // Mock article data
+        const articles = [
+            {
+                id: 1,
+                title: "iPhone 15 Review: Is It Worth the Upgrade?",
+                category: "Reviews",
+                summary: "Discover the new features and performance improvements in Apple's latest flagship.",
+                content: "Apple's iPhone 15 brings faster performance, improved cameras, and a fresh design. But is it worth upgrading from the previous model? Read our in-depth review.",
+            },
+            {
+                id: 2,
+                title: "Top 5 AI Gadgets of 2025",
+                category: "News",
+                summary: "We rank the coolest AI-powered tech devices released this year.",
+                content: "AI tech is everywhere! We rank the five coolest gadgets released this year, from smart home assistants to wearable devices.",
+            },
+            {
+                id: 3,
+                title: "How to Choose a Gaming Laptop",
+                category: "Guides",
+                summary: "Essential tips for picking the perfect gaming machine for your needs.",
+                content: "Picking a gaming laptop can be tough. We break down the specs and features you need to look for in 2025.",
+            }
+        ];
 
-      new Phaser.Game(config);
+        // Homepage loader
+        function showHome() {
+            document.getElementById('main-content').innerHTML = `
+                <section class="latest-articles">
+                    <h2>Latest Articles</h2>
+                    <div class="articles">
+                        ${articles.map(a => `
+                            <article>
+                                <h3><a href="#" onclick="showArticle(${a.id});return false;">${a.title}</a></h3>
+                                <p>${a.summary}</p>
+                            </article>
+                        `).join('')}
+                    </div>
+                </section>
+                <!-- Monetag/Adsense Ad Placeholder (Homepage Top) -->
+                <div class="ad ad-top">
+                    <!-- Insert Monetag or AdSense code here -->
+                    Homepage Ad Placeholder
+                </div>
+                <aside>
+                    <section>
+                        <h2>Categories</h2>
+                        <ul>
+                            <li><a href="#" onclick="showCategory('News');return false;">News</a></li>
+                            <li><a href="#" onclick="showCategory('Reviews');return false;">Reviews</a></li>
+                            <li><a href="#" onclick="showCategory('Guides');return false;">Guides</a></li>
+                        </ul>
+                    </section>
+                    <section>
+                        <h2>Popular Posts</h2>
+                        <ul>
+                            <li><a href="#" onclick="showArticle(2);return false;">Top 5 AI Gadgets of 2025</a></li>
+                            <li><a href="#" onclick="showArticle(1);return false;">iPhone 15 Review</a></li>
+                        </ul>
+                    </section>
+                    <!-- Monetag/Adsense Ad Placeholder (Sidebar) -->
+                    <div class="ad ad-sidebar">
+                        <!-- Insert Monetag or AdSense code here -->
+                        Sidebar Ad Placeholder
+                    </div>
+                </aside>
+            `;
+        }
 
-      document.getElementById("boostBtn").onclick = () => {
-        alert("Simulated Ad Watch");
-        boost = true;
-        document.getElementById("boostBtn").innerText = "BOOST x2 (30s)";
-        setTimeout(() => {
-          boost = false;
-          document.getElementById("boostBtn").innerText = "Watch Ad: Boost x2";
-        }, 30000);
-      };
+        // Article page loader
+        function showArticle(id) {
+            const a = articles.find(x => x.id === id);
+            if (!a) {
+                document.getElementById('main-content').innerHTML = `
+                    <article>
+                        <h2>Article Not Found</h2>
+                        <p>Sorry, this article does not exist.</p>
+                    </article>
+                `;
+                return;
+            }
+            document.getElementById('main-content').innerHTML = `
+                <article>
+                    <h2>${a.title}</h2>
+                    <p>${a.content}</p>
+                </article>
+                <!-- Monetag/Adsense Ad Placeholder (Article Page) -->
+                <div class="ad ad-article">
+                    <!-- Insert Monetag or AdSense code here -->
+                    Article Ad Placeholder
+                </div>
+            `;
+        }
+
+        // Category page loader
+        function showCategory(category) {
+            const filtered = articles.filter(a => a.category === category);
+            document.getElementById('main-content').innerHTML = `
+                <section class="latest-articles">
+                    <h2>${category}</h2>
+                    <div class="articles">
+                        ${filtered.length ? filtered.map(a => `
+                            <article>
+                                <h3><a href="#" onclick="showArticle(${a.id});return false;">${a.title}</a></h3>
+                                <p>${a.summary}</p>
+                            </article>
+                        `).join('') : '<p>No articles in this category yet.</p>'}
+                    </div>
+                </section>
+                <!-- Monetag/Adsense Ad Placeholder (Category Page) -->
+                <div class="ad ad-top">
+                    <!-- Insert Monetag or AdSense code here -->
+                    Category Ad Placeholder
+                </div>
+                <aside>
+                    <section>
+                        <h2>Categories</h2>
+                        <ul>
+                            <li><a href="#" onclick="showCategory('News');return false;">News</a></li>
+                            <li><a href="#" onclick="showCategory('Reviews');return false;">Reviews</a></li>
+                            <li><a href="#" onclick="showCategory('Guides');return false;">Guides</a></li>
+                        </ul>
+                    </section>
+                    <!-- Monetag/Adsense Ad Placeholder (Sidebar) -->
+                    <div class="ad ad-sidebar">
+                        <!-- Insert Monetag or AdSense code here -->
+                        Sidebar Ad Placeholder
+                    </div>
+                </aside>
+            `;
+        }
+
+        // On load, show homepage
+        showHome();
     </script>
-  </body>
+</body>
 </html>
