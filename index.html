@@ -224,6 +224,9 @@ input[type="text"] {
 
   <script>
   let balance = parseInt(localStorage.getItem("minefi_balance") || "0");
+  <script>
+  // === Load Saved Data or Defaults ===
+  let balance = parseInt(localStorage.getItem("minefi_balance") || "0");
   let boostActive = false;
   let boostTimeLeft = 0;
   let boostCount = parseInt(localStorage.getItem("minefi_boosts") || "0");
@@ -231,20 +234,19 @@ input[type="text"] {
   let soundEnabled = localStorage.getItem("minefi_sound") !== "off";
 
   const username = Telegram.WebApp.initDataUnsafe?.user?.username || "MineFiUser";
-  const boostTimerEl = document.getElementById("boostTimer");
-
-  // Load UI with saved data
   document.getElementById("balance").innerText = balance;
   document.getElementById("walletBalance").innerText = balance;
   document.getElementById("boostCount").innerText = boostCount;
   document.getElementById("usernameDisplay").innerText = "@" + username;
   document.getElementById("refLink").value = `https://t.me/MineFiBot?start=${username}`;
 
+  // === TAB SWITCHING ===
   function showTab(id) {
     document.querySelectorAll(".tab-content").forEach(tab => tab.classList.remove("active"));
     document.getElementById(id).classList.add("active");
   }
 
+  // === TAPPING COIN ===
   function mine() {
     const amount = boostActive ? 2 : 1;
     balance += amount;
@@ -254,6 +256,7 @@ input[type="text"] {
     if (soundEnabled) playClick();
   }
 
+  // === BOOST FEATURE ===
   function activateBoost() {
     if (boostActive || boostTimeLeft > 0) return;
 
@@ -270,45 +273,42 @@ input[type="text"] {
       if (boostTimeLeft <= 0) {
         clearInterval(timer);
         boostActive = false;
-        boostTimerEl.innerText = "";
+        document.getElementById("boostTimer").innerText = "";
       }
     }, 1000);
   }
 
   function updateBoostTimer() {
     if (boostTimeLeft > 0) {
-      boostTimerEl.innerText = `⏱️ Boost: ${boostTimeLeft}s`;
+      document.getElementById("boostTimer").innerText = `⏱️ Boost: ${boostTimeLeft}s`;
     } else {
-      boostTimerEl.innerText = "";
+      document.getElementById("boostTimer").innerText = "";
     }
   }
 
+  // === TASK SYSTEM / AD COOLDOWN ===
   function handleAdTask() {
     const now = Date.now();
     if (now < nextAdTime) {
       const minutesLeft = Math.ceil((nextAdTime - now) / 60000);
-      alert(`Please wait ${minutesLeft} more minute(s)`);
+      alert(`⏳ Wait ${minutesLeft} more min(s) to claim this task again.`);
       return;
     }
+
+    // Open Monetag smartlink
     window.open("https://otieu.com/4/8777184", "_blank");
-    nextAdTime = now + 20 * 60 * 1000;
+
+    nextAdTime = now + 20 * 60 * 1000; // 20 minutes cooldown
     localStorage.setItem("minefi_nextAd", nextAdTime);
   }
 
+  // === SETTINGS ===
   function changeUsername() {
-    const input = document.getElementById("usernameInput").value.trim();
-    if (input) {
-      document.getElementById("usernameDisplay").innerText = "@" + input;
-      document.getElementById("refLink").value = `https://t.me/MineFiBot?start=${input}`;
+    const newUser = document.getElementById("usernameInput").value.trim();
+    if (newUser) {
+      document.getElementById("usernameDisplay").innerText = "@" + newUser;
+      document.getElementById("refLink").value = `https://t.me/MineFiBot?start=${newUser}`;
     }
-  }
-
-  function copyReferral() {
-    const ref = document.getElementById("refLink");
-    ref.select();
-    ref.setSelectionRange(0, 99999);
-    navigator.clipboard.writeText(ref.value);
-    alert("Referral link copied!");
   }
 
   function toggleTheme() {
@@ -318,16 +318,26 @@ input[type="text"] {
   function toggleSound() {
     soundEnabled = !soundEnabled;
     localStorage.setItem("minefi_sound", soundEnabled ? "on" : "off");
-    alert("Sound " + (soundEnabled ? "enabled" : "disabled"));
+    alert("🔈 Sound " + (soundEnabled ? "enabled" : "disabled"));
   }
 
+  // === REFERRAL COPY ===
+  function copyReferral() {
+    const ref = document.getElementById("refLink");
+    ref.select();
+    ref.setSelectionRange(0, 99999);
+    navigator.clipboard.writeText(ref.value);
+    alert("✅ Referral link copied!");
+  }
+
+  // === SOUND ON TAP ===
   function playClick() {
     const click = new Audio("https://cdn.pixabay.com/download/audio/2023/06/15/audio_5e8b4cd403.mp3?filename=click-147954.mp3");
     click.play();
   }
 
-  // Set up coin tap
+  // === CONNECT COIN TAP TO FUNCTION ===
   document.getElementById("coinBtn").addEventListener("click", mine);
-  </script>
+</script>
 </body>
 </html>
