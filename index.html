@@ -1,343 +1,136 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>MineFi</title>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" />
+  <meta charset="UTF-8">
+  <title>MineFi Runner</title>
+  <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.js"></script>
   <style>
-    * {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-body {
-  font-family: 'Poppins', sans-serif;
-  background: #121212;
-  color: white;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  transition: background 0.3s, color 0.3s;
-}
-
-.app-header {
-  text-align: center;
-  padding: 10px;
-}
-
-.logo {
-  height: 60px;
-  margin-bottom: 10px;
-}
-
-.balance {
-  font-size: 18px;
-  margin-top: 5px;
-  font-weight: 600;
-}
-
-main {
-  flex: 1;
-  overflow-y: auto;
-  padding: 15px 20px;
-}
-
-.tab-content {
-  display: none;
-  animation: fadeIn 0.3s ease;
-}
-
-.tab-content.active {
-  display: block;
-}
-
-@keyframes fadeIn {
-  from {opacity: 0;}
-  to {opacity: 1;}
-}
-
-.coin {
-  width: 120px;
-  height: 120px;
-  margin: 30px auto;
-  background: radial-gradient(circle, gold 0%, orange 100%);
-  border-radius: 50%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-weight: bold;
-  font-size: 18px;
-  box-shadow: 0 0 15px rgba(255, 215, 0, 0.8);
-  cursor: pointer;
-  transition: transform 0.1s ease, box-shadow 0.2s ease;
-}
-
-.coin:active {
-  transform: scale(1.1);
-  box-shadow: 0 0 25px rgba(255, 215, 0, 1);
-}
-
-button {
-  font-family: 'Poppins', sans-serif;
-}
-
-.boost-btn, .task-btn, .btn {
-  display: block;
-  margin: 15px auto;
-  padding: 12px 20px;
-  background: #ff9800;
-  color: white;
-  font-weight: bold;
-  border: none;
-  border-radius: 12px;
-  cursor: pointer;
-  font-size: 15px;
-  box-shadow: 0 3px 6px rgba(0,0,0,0.3);
-  transition: background 0.3s;
-}
-
-.boost-btn:hover, .task-btn:hover, .btn:hover {
-  background: #ffa726;
-}
-
-.boost-timer {
-  text-align: center;
-  font-size: 16px;
-  margin-top: 10px;
-  color: #90ee90;
-}
-
-input[type="text"] {
-  display: block;
-  margin: 10px auto;
-  padding: 10px;
-  width: 90%;
-  border-radius: 8px;
-  border: none;
-  font-size: 14px;
-}
-
-.tabs {
-  display: flex;
-  justify-content: space-around;
-  background: #1f1f1f;
-  padding: 10px 0;
-  position: fixed;
-  bottom: 0;
-  width: 100%;
-  border-top: 1px solid #333;
-}
-
-.tab-btn {
-  background: none;
-  border: none;
-  color: white;
-  font-size: 16px;
-  cursor: pointer;
-}
-
-.info-text {
-  text-align: center;
-  font-size: 14px;
-  color: #ccc;
-  margin-top: 10px;
-}
-
-/* Light Theme Support */
-.light-theme {
-  background: white;
-  color: black;
-}
-
-.light-theme .tabs {
-  background: #eee;
-  border-top: 1px solid #ccc;
-}
-
-.light-theme .tab-btn {
-  color: black;
-}
-
-.light-theme .boost-btn,
-.light-theme .task-btn,
-.light-theme .btn {
-  background: #ff9800;
-  color: white;
+    body, html {
+      margin: 0;
+      padding: 0;
+      background: black;
+      overflow: hidden;
+    }
+    #boostBtn {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      background: gold;
+      padding: 10px 15px;
+      border-radius: 10px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    #balance {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      color: white;
+      font-family: sans-serif;
+      font-size: 18px;
     }
   </style>
 </head>
 <body>
-  <header class="app-header">
-    <img src="https://chat.openai.com/sandbox/mnt/data/MineFi_logo_640x360.png" alt="MineFi Logo" class="logo"/>
-    <h2 id="usernameDisplay">@username</h2>
-    <p class="balance">Balance: <span id="balance">0</span> MINEFI</p>
-  </header>
 
-  <main>
-    <!-- Tap Page -->
-    <section id="tap" class="tab-content active">
-      <div class="coin" id="coinBtn">MineFi</div>
-      <button class="boost-btn" onclick="activateBoost()">⚡ Boost x2</button>
-      <div id="boostTimer" class="boost-timer"></div>
-    </section>
+<div id="balance">$MINEFI: 0</div>
+<div id="boostBtn">Watch Ad: Boost x2</div>
 
-    <!-- Tasks Page -->
-    <section id="tasks" class="tab-content">
-      <h3>Tasks</h3>
-      <button class="task-btn" onclick="handleAdTask()">📺 Watch Ad</button>
-      <p id="adTimer" class="info-text"></p>
-    </section>
-
-    <!-- Referral Page -->
-    <section id="referral" class="tab-content">
-      <h3>Your Referral Link</h3>
-      <input type="text" id="refLink" readonly />
-      <button class="btn" onclick="copyReferral()">Copy Link</button>
-    </section>
-
-    <!-- Wallet Page -->
-    <section id="wallet" class="tab-content">
-      <h3>Wallet</h3>
-      <p>Coins Mined: <span id="walletBalance">0</span> MINEFI</p>
-      <p>Boosts Used: <span id="boostCount">0</span></p>
-    </section>
-
-    <!-- Settings Page -->
-    <section id="settings" class="tab-content">
-      <h3>Settings</h3>
-      <input type="text" id="usernameInput" placeholder="Change username"/>
-      <button class="btn" onclick="changeUsername()">Save</button>
-      <button class="btn" onclick="toggleTheme()">🌙 Toggle Theme</button>
-      <button class="btn" onclick="toggleSound()">🔈 Toggle Sound</button>
-    </section>
-  </main>
-
-  <footer class="tabs">
-    <button class="tab-btn" onclick="showTab('tap')">🪙 Tap</button>
-    <button class="tab-btn" onclick="showTab('tasks')">📋 Tasks</button>
-    <button class="tab-btn" onclick="showTab('referral')">👥 Referral</button>
-    <button class="tab-btn" onclick="showTab('wallet')">💼 Wallet</button>
-    <button class="tab-btn" onclick="showTab('settings')">⚙️ Settings</button>
-  </footer>
-
-  <script>
-  let balance = parseInt(localStorage.getItem("minefi_balance") || "0");
-  <script>
-  // === Load Saved Data or Defaults ===
-  let balance = parseInt(localStorage.getItem("minefi_balance") || "0");
+<script>
+  let coinValue = 1;
+  let balance = 0;
   let boostActive = false;
-  let boostTimeLeft = 0;
-  let boostCount = parseInt(localStorage.getItem("minefi_boosts") || "0");
-  let nextAdTime = parseInt(localStorage.getItem("minefi_nextAd") || "0");
-  let soundEnabled = localStorage.getItem("minefi_sound") !== "off";
 
-  const username = Telegram.WebApp.initDataUnsafe?.user?.username || "MineFiUser";
-  document.getElementById("balance").innerText = balance;
-  document.getElementById("walletBalance").innerText = balance;
-  document.getElementById("boostCount").innerText = boostCount;
-  document.getElementById("usernameDisplay").innerText = "@" + username;
-  document.getElementById("refLink").value = `https://t.me/MineFiBot?start=${username}`;
-
-  // === TAB SWITCHING ===
-  function showTab(id) {
-    document.querySelectorAll(".tab-content").forEach(tab => tab.classList.remove("active"));
-    document.getElementById(id).classList.add("active");
-  }
-
-  // === TAPPING COIN ===
-  function mine() {
-    const amount = boostActive ? 2 : 1;
-    balance += amount;
-    document.getElementById("balance").innerText = balance;
-    document.getElementById("walletBalance").innerText = balance;
-    localStorage.setItem("minefi_balance", balance);
-    if (soundEnabled) playClick();
-  }
-
-  // === BOOST FEATURE ===
-  function activateBoost() {
-    if (boostActive || boostTimeLeft > 0) return;
-
-    boostActive = true;
-    boostTimeLeft = 30;
-    boostCount++;
-    localStorage.setItem("minefi_boosts", boostCount);
-    document.getElementById("boostCount").innerText = boostCount;
-    updateBoostTimer();
-
-    const timer = setInterval(() => {
-      boostTimeLeft--;
-      updateBoostTimer();
-      if (boostTimeLeft <= 0) {
-        clearInterval(timer);
-        boostActive = false;
-        document.getElementById("boostTimer").innerText = "";
+  const config = {
+    type: Phaser.AUTO,
+    width: 360,
+    height: 640,
+    physics: {
+      default: 'arcade',
+      arcade: {
+        gravity: { y: 500 },
+        debug: false
       }
-    }, 1000);
+    },
+    scene: {
+      preload,
+      create,
+      update
+    }
+  };
+
+  const game = new Phaser.Game(config);
+  let player, cursors, coins, ground;
+  let coinTimer = 0;
+
+  function preload() {
+    this.load.image('bg', 'https://i.imgur.com/xD7TlaE.png'); // tunnel background
+    this.load.image('player', 'https://i.imgur.com/JpT5LQb.png'); // basic character
+    this.load.image('coin', 'https://i.imgur.com/TqRlKqv.png'); // coin
+    this.load.image('ground', 'https://i.imgur.com/UWbVJhT.png'); // ground tile
   }
 
-  function updateBoostTimer() {
-    if (boostTimeLeft > 0) {
-      document.getElementById("boostTimer").innerText = `⏱️ Boost: ${boostTimeLeft}s`;
+  function create() {
+    this.add.tileSprite(0, 0, 360, 640, 'bg').setOrigin(0).setScrollFactor(0);
+
+    ground = this.physics.add.staticGroup();
+    for (let x = 0; x < 400; x += 64) {
+      ground.create(x, 600, 'ground').setScale(1).refreshBody();
+    }
+
+    player = this.physics.add.sprite(180, 500, 'player').setScale(0.5);
+    player.setCollideWorldBounds(true);
+
+    coins = this.physics.add.group();
+    this.physics.add.collider(player, ground);
+    this.physics.add.overlap(player, coins, collectCoin, null, this);
+
+    cursors = this.input.keyboard.createCursorKeys();
+
+    this.input.on('pointerdown', () => {
+      if (player.body.touching.down) {
+        player.setVelocityY(-350);
+      }
+    });
+
+    // Spawn coins every 1 second
+    this.time.addEvent({
+      delay: 1000,
+      callback: () => {
+        const x = Phaser.Math.Between(50, 310);
+        const coin = coins.create(x, -20, 'coin').setScale(0.4);
+        coin.setVelocityY(150);
+      },
+      loop: true
+    });
+  }
+
+  function update() {
+    if (cursors.left.isDown) {
+      player.setVelocityX(-160);
+    } else if (cursors.right.isDown) {
+      player.setVelocityX(160);
     } else {
-      document.getElementById("boostTimer").innerText = "";
+      player.setVelocityX(0);
     }
   }
 
-  // === TASK SYSTEM / AD COOLDOWN ===
-  function handleAdTask() {
-    const now = Date.now();
-    if (now < nextAdTime) {
-      const minutesLeft = Math.ceil((nextAdTime - now) / 60000);
-      alert(`⏳ Wait ${minutesLeft} more min(s) to claim this task again.`);
-      return;
-    }
-
-    // Open Monetag smartlink
-    window.open("https://otieu.com/4/8777184", "_blank");
-
-    nextAdTime = now + 20 * 60 * 1000; // 20 minutes cooldown
-    localStorage.setItem("minefi_nextAd", nextAdTime);
+  function collectCoin(player, coin) {
+    coin.destroy();
+    balance += boostActive ? (coinValue * 2) : coinValue;
+    document.getElementById("balance").innerText = `$MINEFI: ${balance}`;
   }
 
-  // === SETTINGS ===
-  function changeUsername() {
-    const newUser = document.getElementById("usernameInput").value.trim();
-    if (newUser) {
-      document.getElementById("usernameDisplay").innerText = "@" + newUser;
-      document.getElementById("refLink").value = `https://t.me/MineFiBot?start=${newUser}`;
-    }
-  }
-
-  function toggleTheme() {
-    document.body.classList.toggle("light-theme");
-  }
-
-  function toggleSound() {
-    soundEnabled = !soundEnabled;
-    localStorage.setItem("minefi_sound", soundEnabled ? "on" : "off");
-    alert("🔈 Sound " + (soundEnabled ? "enabled" : "disabled"));
-  }
-
-  // === REFERRAL COPY ===
-  function copyReferral() {
-    const ref = document.getElementById("refLink");
-    ref.select();
-    ref.setSelectionRange(0, 99999);
-    navigator.clipboard.writeText(ref.value);
-    alert("✅ Referral link copied!");
-  }
-
-  // === SOUND ON TAP ===
-  function playClick() {
-    const click = new Audio("https://cdn.pixabay.com/download/audio/2023/06/15/audio_5e8b4cd403.mp3?filename=click-147954.mp3");
-    click.play();
-  }
-
-  // === CONNECT COIN TAP TO FUNCTION ===
-  document.getElementById("coinBtn").addEventListener("click", mine);
+  // Boost logic
+  document.getElementById("boostBtn").onclick = () => {
+    alert("🎥 Ad Playing (simulated)");
+    boostActive = true;
+    document.getElementById("boostBtn").innerText = "BOOST x2 (30s)";
+    setTimeout(() => {
+      boostActive = false;
+      document.getElementById("boostBtn").innerText = "Watch Ad: Boost x2";
+    }, 30000);
+  };
 </script>
 </body>
 </html>
